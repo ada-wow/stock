@@ -1,0 +1,59 @@
+PUT stock-2020-06-22
+{
+  "mappings": {
+    "properties": {
+      "symbol":{
+        "type": "keyword"
+      },
+      "name":{
+        "type": "keyword"
+      },
+      "percent":{
+        "type": "double"
+      },
+      "industry_area":{
+        "type": "keyword"
+      },
+      "concept_area":{
+        "type": "keyword"
+      },
+      "location_area":{
+        "type": "keyword"
+      },
+      "body":{
+        "type": "text"
+      },
+      "date":{
+        "type": "date"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}
+GET stock-2020-06-22
+
+DELETE stock-2020-06-22
+
+GET stock-2020-06-22/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+POST /_aliases
+{
+    "actions" : [
+        { "add" : { "index" : "stock-2020-06-22", "alias" : "stock" } }
+    ]
+}
+
+
+
+
+
+
+
