@@ -7,16 +7,17 @@ import requests
 import json
 import time
 from elasticsearch import Elasticsearch
+from elasticsearch import helpers
 
 #todo
 #自动建立stock和checkpoint的时间分片index
 #结束后force merge位一个segment，并且设置index为只读
 
-index_name = "stock-2020-06-23"
-date_str = "2020-06-23"
+index_name = "stock-2020-06-24"
+date_str = "2020-06-24"
 timeArray = time.strptime(date_str, '%Y-%m-%d')
 current_time = int(time.mktime(timeArray))
-checkpoint_name = "checkpoint-2020-06-23"
+checkpoint_name = "checkpoint-2020-06-24"
 checkpoint_separator_symbol = "$$"
 
 
@@ -66,9 +67,9 @@ def get_area_stock_data(node):
     area_data = []
     page = 1
     while (True):
-        time.sleep(4)
+        time.sleep(1)
         url = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page=" + str(
-            page) + "&num=40&sort=symbol&asc=1&node=" + node + "&symbol=&_s_r_a=init"
+            page) + "&num=100&sort=symbol&asc=1&node=" + node + "&symbol=&_s_r_a=init"
         # url = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page=" + str(page) + "&num=40&sort=symbol&asc=1&node=chgn_700682&symbol=&_s_r_a=auto"
         resp = requests.get(url)
         print(url)
@@ -83,18 +84,20 @@ def get_area_stock_data(node):
         for stock in json_result:
             stock['name'] = stock['name'].encode('utf-8')
             area_data.append(stock)
+        if len(json_result) < 100:
+            break
         page = page + 1
     return area_data
 
 
 def save_area_data_to_es(area_data, area_name, area_id, es_client):
+    actions = []
     for stock in area_data:
         exist = True
         stock_doc = {}
         try:
             stock_doc = es_client.get(index_name, id=stock["symbol"])
         except Exception as ex:
-
             if ex.status_code == 404:
                 exist = False
         if exist:
@@ -107,20 +110,24 @@ def save_area_data_to_es(area_data, area_name, area_id, es_client):
             if area_id == 3:
                 if area_name not in stock_doc['_source']['location_area']:
                     stock_doc['_source']['location_area'].append(area_name)
-            es_client.index(index=index_name, body=stock_doc['_source'], id=stock_doc['_id'])
-        else:
-            data = {
+        action = {
+            "_index": index_name,
+            "_type": "_doc",
+            "_id": stock["symbol"],
+            "_source": {
                 "symbol": stock['symbol'],
                 "name": stock['name'],
                 "percent": float(stock['changepercent']),
-                "industry_area": [area_name] if area_id == 2 else [],
-                "concept_area": [area_name] if area_id == 1 else [],
-                "location_area": [area_name] if area_id == 3 else [],
+                "industry_area": stock_doc['_source']['industry_area'] if stock_doc else [],
+                "concept_area": stock_doc['_source']['concept_area'] if stock_doc else [],
+                "location_area": stock_doc['_source']['location_area'] if stock_doc else [],
                 "body": json.dumps(stock),
                 "date": current_time
             }
-            es_client.index(index=index_name, body=data, id=stock['symbol'])
-        print("finish the index:[%s]" % stock['symbol'])
+        }
+        actions.append(action)
+    helpers.bulk(es_client, actions)
+    print("finish the area_name:[%s]" % area_name)
 
 def get_area_data(type):
     body = {
@@ -159,6 +166,7 @@ def save_checkpoint(name, node, type):
 if __name__ == '__main__':
 
     es = Elasticsearch(hosts="http://localhost:9200")
+
     get_concept_area_id(es)
     get_industry_area_id(es)
     get_location_area_id(es)

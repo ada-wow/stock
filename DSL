@@ -25,7 +25,9 @@ PUT stock-2020-06-22
         "type": "text"
       },
       "date":{
-        "type": "date"
+        "type": "date",
+        "format": "epoch_second",
+        "ignore_malformed": false
       }
     }
   },
