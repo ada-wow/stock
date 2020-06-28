@@ -1,6 +1,7 @@
 PUT stock-2020-06-22
 {
   "mappings": {
+    "dynamic": "strict",
     "properties": {
       "symbol":{
         "type": "keyword"
@@ -33,21 +34,37 @@ PUT stock-2020-06-22
     "number_of_replicas": 0
   }
 }
-GET stock-2020-06-22
-
-DELETE stock-2020-06-22
-
-GET stock-2020-06-22/_search
-{
-  "query": {
-    "match_all": {}
-  }
-}
-
 POST /_aliases
 {
     "actions" : [
         { "add" : { "index" : "stock-2020-06-22", "alias" : "stock" } }
+    ]
+}
+
+
+
+
+PUT checkpoint-2020-06-23
+{
+  "mappings": {
+    "properties": {
+      "type":{
+        "type": "integer"
+      },
+      "check":{
+        "type": "integer"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}
+POST /_aliases
+{
+    "actions" : [
+        { "add" : { "index" : "checkpoint-2020-06-23", "alias" : "checkpoint" } }
     ]
 }
 
@@ -60,7 +77,4 @@ PUT stock/_settings
     }
   }
 }
-
-
-
 
