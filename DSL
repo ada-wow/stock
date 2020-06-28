@@ -52,7 +52,14 @@ POST /_aliases
 }
 
 
-
+PUT stock/_settings
+{
+  "index":{
+    "blocks":{
+      "read_only":true
+    }
+  }
+}
 
 
 

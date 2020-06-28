@@ -1,0 +1,94 @@
+version: "2"
+
+networks:
+  elaticsearch_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.33.0.0/24
+          gateway: 172.33.0.1
+
+
+services:
+  stock_es_proxy:
+    image: nginx
+    container_name: stock_es_proxy
+    restart: always
+    tty: true
+    ports:
+      - 6789:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      elaticsearch_net:
+        ipv4_address: 172.33.0.20
+    depends_on:
+      - es_master
+      - es_data1
+
+  es_master:
+    image: elasticsearch:7.8.0
+    container_name: es_master
+    restart: always
+    environment:
+      - node.name=es_master
+      - node.master=true
+      - node.data=false
+      - cluster.name=stock_ELK
+      - cluster.initial_master_nodes=es_master
+      - discovery.seed_hosts=es_master,es_data1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - /tmp/stock_ELK/es_master/data:/usr/share/elasticsearch/data:rw
+      - /tmp/stock_ELK/es_master/logs:/usr/share/elasticsearch/logs:rw
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      elaticsearch_net:
+        ipv4_address: 172.33.0.21
+
+
+  es_data1:
+    image: elasticsearch:7.8.0
+    container_name: es_data1
+    restart: always
+    environment:
+      - node.name=es_data1
+      - node.master=false
+      - node.data=true
+      - cluster.name=stock_ELK
+      - cluster.initial_master_nodes=es_master
+      - discovery.seed_hosts=es_master,es_data1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - /tmp/stock_ELK/es_data1/data:/usr/share/elasticsearch/data:rw
+      - /tmp/stock_ELK/es_data1/logs:/usr/share/elasticsearch/logs:rw
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      elaticsearch_net:
+        ipv4_address: 172.33.0.22
+
+  kibana:
+    image: kibana:7.8.0
+    container_name: es_kibana
+    restart: always
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    networks:
+      elaticsearch_net:
+        ipv4_address: 172.33.0.23
+    ports:
+      - 6780:5601
+    depends_on:
+      - es_master
+      - es_data1
+
+
