@@ -1,4 +1,4 @@
-PUT stock-2020-06-22
+PUT stock_2020-07-08
 {
   "mappings": {
     "dynamic": "strict",
@@ -24,10 +24,9 @@ PUT stock-2020-06-22
       "body":{
         "type": "text"
       },
-      "date":{
+      "current_date":{
         "type": "date",
-        "format": "epoch_second",
-        "ignore_malformed": false
+        "format" : "strict_date_optional_time||epoch_second"
       }
     }
   },
@@ -39,14 +38,14 @@ PUT stock-2020-06-22
 POST /_aliases
 {
     "actions" : [
-        { "add" : { "index" : "stock-2020-06-22", "alias" : "stock" } }
+        { "add" : { "index" : "stock_2020-07-08", "alias" : "stock" } }
     ]
 }
 
 
 
 
-PUT checkpoint-2020-06-23
+PUT checkpoint-2020-07-08
 {
   "mappings": {
     "properties": {
@@ -66,7 +65,7 @@ PUT checkpoint-2020-06-23
 POST /_aliases
 {
     "actions" : [
-        { "add" : { "index" : "checkpoint-2020-06-23", "alias" : "checkpoint" } }
+        { "add" : { "index" : "checkpoint-2020-07-08", "alias" : "checkpoint" } }
     ]
 }
 

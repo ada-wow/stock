@@ -13,11 +13,11 @@ from elasticsearch import helpers
 #自动建立stock和checkpoint的时间分片index
 #结束后force merge位一个segment，并且设置index为只读
 
-index_name = "stock-2020-06-24"
-date_str = "2020-06-24"
+index_name = "stock_2020-07-31"
+date_str = "2020-07-31"
 timeArray = time.strptime(date_str, '%Y-%m-%d')
 current_time = int(time.mktime(timeArray))
-checkpoint_name = "checkpoint-2020-06-24"
+checkpoint_name = "checkpoint-2020-07-31"
 checkpoint_separator_symbol = "$$"
 
 
@@ -122,7 +122,7 @@ def save_area_data_to_es(area_data, area_name, area_id, es_client):
                 "concept_area": stock_doc['_source']['concept_area'] if stock_doc else [],
                 "location_area": stock_doc['_source']['location_area'] if stock_doc else [],
                 "body": json.dumps(stock),
-                "date": current_time
+                "current_date": current_time
             }
         }
         actions.append(action)
