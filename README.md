@@ -120,7 +120,7 @@ title：大事件标题
 message：大事件具体描述及数据简介（当中数据可以提取）
 ```
 
-### 雪球 （app 端）个股十大流通股东
+### 雪球 （app 端）个股十大股东&流通股东
 
 接口地址
 
@@ -132,8 +132,8 @@ https://stock.xueqiu.com/v5/stock/f10/cn/top_holders.json?circula=1&symbol=SH600
 
 ```
 symbol：股票编号
-locate: 时间戳
-circula：固定资产周转率 （默认为 1）
+locate: 时间戳（不传的话默认系统最新时间戳）
+circula：固定资产周转率 1为流通股东 0为股东
 ```
 
 响应参数
@@ -146,6 +146,20 @@ items: [
 		held_ratio：持股比例
 		holder_name：持股人/机构
 	}
+]
+quit: [
+  {
+    held_num: 上期持股
+    held_ratio: 上期占比
+    holder_rank: 上期排名
+    holder_name: 股东名字
+  }
+]
+time: [
+  {
+    name: 名字
+    value: 时间戳 （上面locate参数可由此字段获取请求）
+  }
 ]
 ```
 
