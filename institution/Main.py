@@ -10,13 +10,16 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 
 
-def get_top_holder(circula, symbol, locate=None, count=5000):
+def get_top_holder(circula, symbol, locate=None, count=200):
     url = "https://stock.xueqiu.com/v5/stock/f10/cn/top_holders.json"
 
-    querystring = {"symbol":symbol,"circula":circula,"count":count}
+    querystring = {"symbol":symbol,"circula":circula}
     if locate:
         querystring["locate"] = locate
-
+        querystring["start"] = locate
+    else:
+        querystring["count"] = count
+    current_second_time = int(time.time())
     headers = {
 'Host': 'stock.xueqiu.com',
 'Connection': 'keep-alive',
@@ -28,22 +31,43 @@ def get_top_holder(circula, symbol, locate=None, count=5000):
 'Sec-Fetch-Site': 'same-site',
 'Sec-Fetch-Mode': 'cors',
 'Sec-Fetch-Dest': 'empty',
-'Referer': 'https://xueqiu.com/snowman/S/SZ002797/detail',
+'Referer': 'https://xueqiu.com/snowman/S/' + symbol + '/detail',
 'Accept-Encoding': 'gzip, deflate, br',
 'Accept-Language': 'zh-CN,zh;q=0.9',
-'Cookie': '_ga=GA1.2.232444739.1549972267; device_id=24700f9f1986800ab4fcc880530dd0ed; s=ce1bjaqtid; xq_a_token=4db837b914fc72624d814986f5b37e2a3d9e9944; xq_r_token=2d6d6cc8e57501dfe571d2881cabc6a5f2542bf8; xq_id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOi0xLCJpc3MiOiJ1YyIsImV4cCI6MTYwMDQ4MzAwNywiY3RtIjoxNTk4MDY2ODIyNjc0LCJjaWQiOiJkOWQwbjRBWnVwIn0.N1705I6ZerltkE5vOzy6vaVkjEpYOUloNInZVopXQPNnBxM2mAD6PUL80OXCigRWK3xwTUt3G4bYpkaPgNcMwDhpG8lnSb4MhOBm8apE1HMEyn1oRE9GNhyMHBCLFj2FFMy9d15POECJggdlTM3z9qGFki4bsHiwKDCKlvOhGAWfynPpbqr8ivsYt0xhHQmwLMe7UZaJsoq32ZqzUy6lygZMV7ykxZs_oOKy8vZfLXeCcvy-UGdtayvOgKwW592Cgc8NpVU5qHDJ0m6AdExAnyCL_XxwqMAX102eVwVUZuALouUqR_R1Ro3X9hj6_HHqIGFLgzvtSedoXcdE2zp7fQ; u=491598066844087; Hm_lvt_1db88642e346389874251b5a1eded6e3=1597833682,1598066844,1598100049,1598102454; is_overseas=0; Hm_lpvt_1db88642e346389874251b5a1eded6e3=1598364567'
-#'Cookie': '_ga=GA1.2.232444739.1549972267; device_id=24700f9f1986800ab4fcc880530dd0ed; s=ce1bjaqtid; xq_a_token=69a6c81b73f854a856169c9aab6cd45348ae1299; xqat=69a6c81b73f854a856169c9aab6cd45348ae1299; xq_r_token=08a169936f6c0c1b6ee5078ea407bb28f28efecf; xq_id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOi0xLCJpc3MiOiJ1YyIsImV4cCI6MTU5ODMyMzAwNCwiY3RtIjoxNTk3MzE5MjQ3NjA4LCJjaWQiOiJkOWQwbjRBWnVwIn0.KpU4uW9yv1jCCMqOYezNAhzbsebfwTe_xzMh-PRnVjS8N7EbgopFvi-lCAuXYi7Sxoap_rfGYnpGwFMlRgG54-xRodw-fLba_BPXikIGM56TG6dcEn1GEviTgUZRaiCH5U3_XDVyhAm_dK5nIamobGNfzcYtN9YCRANPP0Bv8B1owZew6Yr4tTq3uGgcBuSYBRMFpDuoT46VcBknV-yZe1xQUZVW-l-GML-blK1UJMU1gtQpxlxahPrbZAsxxZI0Zto6Go8EVITXpHxMt1skCLcWDVqSZdA65cuT3Wn1m-spVI6GkswhZbYRP-Gm3vn4ymtOIeZE8J1cxHUbgM7OBQ; u=161597319294924; Hm_lvt_1db88642e346389874251b5a1eded6e3=1597319777,1597412476,1597562890,1597756814; Hm_lpvt_1db88642e346389874251b5a1eded6e3=1597759445'
+'Cookie': 'xq_a_token=4db837b914fc72624d814986f5b37e2a3d9e9944;'
 
 }
     get_xueqiu_succ = False
     while not get_xueqiu_succ:
         try:
+            resp = {}
             response = requests.request("GET", url, headers=headers, params=querystring)
+            # if int(response.json()['data']['times'][0]['value']) < int((time.time() - 200 * 24 * 60 * 60) * 1000):
+            #     print ("out  date stock")
+            #     import pdb;
+            #     pdb.set_trace()
+            print(querystring)
+            print("old:" , response.json()['data']['times'])
+            if len(response.json()['data']['times']) > 0:
+                first_time = response.json()['data']['times'][0]['value']
+                resp = response
+            response = requests.request("GET", url, headers=headers, params=querystring)
+            if len(response.json()['data']['times']) > 0 and response.json()['data']['times'][0]['value'] > first_time:
+                first_time = response.json()['data']['times'][0]['value']
+                resp = response
+            print("new:" , response.json()['data']['times'])
+            response = requests.request("GET", url, headers=headers, params=querystring)
+            if len(response.json()['data']['times']) > 0 and response.json()['data']['times'][0]['value'] > first_time:
+                first_time = response.json()['data']['times'][0]['value']
+                resp = response
+            print("lat:", response.json()['data']['times'])
             get_xueqiu_succ = True
         except Exception, ex:
             print("get xueqiu error:", ex.message)
             time.sleep(30)
-    return response.json()
+    resp = resp.json() if resp else {'data':{'times':[]}}
+    print("ret:", resp['data']['times'])
+    return resp
 
 
 def save_top_holder(resp, index_name, es):
@@ -76,21 +100,23 @@ def save_top_holder(resp, index_name, es):
             print(item[u'name'].encode('utf-8'))
             print("exits in temp holder recoerd")
             continue
-        time.sleep(0.1)
+        time.sleep(3)
         for i in range(3):
             top_holder_json = get_top_holder(circula, symbol)
             if len(top_holder_json['data']['times']) == 0:
-                time.sleep(0.5)
+                time.sleep(3)
                 print(symbol)
             else:
                 break
         print(top_holder_json)
         if len(top_holder_json['data']['times']) == 0:
             print("No result")
+            es.index(index='tmp_holder_record', body={}, id=symbol)
             continue
         else:
             if int(top_holder_json['data']['times'][0]['value']) < latest_min_time:
                 print ("out  date stock")
+                # import pdb;pdb.set_trace()
                 print(item[u'name'].encode('utf-8'))
                 continue
         latest_time = top_holder_json['data']['times'][0]['value']
@@ -121,7 +147,7 @@ def save_top_holder(resp, index_name, es):
         while True:
             top_holder_json = get_top_holder(all_circula, symbol)
             if len(top_holder_json['data']['times']) == 0:
-                time.sleep(0.1)
+                time.sleep(3)
                 print("do not get the all_circula holder")
                 print(symbol)
             else:
@@ -134,7 +160,7 @@ def save_top_holder(resp, index_name, es):
                 break
             if not is_latest_one:
                 top_holder_json = get_top_holder(all_circula, symbol, each_report['value'])
-                time.sleep(0.1)
+                time.sleep(3)
             for stud in top_holder_json['data']['items']:
                 single_holder = {
                     "_index": index_name,
