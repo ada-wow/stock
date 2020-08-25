@@ -46,11 +46,14 @@ def get_top_holder(circula, symbol, locate=None, count=5000):
     return response.json()
 
 
-def save_top_holder(resp, circula, index_name, es):
+def save_top_holder(resp, index_name, es):
+    circula = 1
+    all_circula = 0
     latest_min_time = int((time.time() - 200*24*60*60)*1000)
     for item in resp[u'hits'][u'hits']:
         item = item['_source']
         symbol = item[u'symbol']
+        price = "" #TODO get the price
         exist = False
         try:
             stock_doc = es.get("tmp_holder_record", id=symbol)
@@ -78,6 +81,16 @@ def save_top_holder(resp, circula, index_name, es):
                 print ("out  date stock")
                 print(item[u'name'].encode('utf-8'))
                 continue
+        circula_holder = []
+        non_circula_holder = []
+        all_circula_holder = []
+        for stud in top_holder_json['data']['items']:
+            single_holder = {
+                "symbol": symbol,
+                "name": item[u'name'],
+                "change": stud['chg'],
+            }
+
 
         actions = []
         is_latest_one = True
@@ -141,7 +154,6 @@ if __name__ == '__main__':
     }
     resp = es.search(index="stock_2020-08-20", body=body)
 
-    save_top_holder(resp, 0, index_name, es)
-    save_top_holder(resp, 1, index_name, es)
+    save_top_holder(resp, index_name, es)
 
 
