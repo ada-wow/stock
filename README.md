@@ -120,7 +120,7 @@ title：大事件标题
 message：大事件具体描述及数据简介（当中数据可以提取）
 ```
 
-### 雪球 （app 端）个股十大流通股东
+### 雪球 （app 端）个股十大股东&流通股东
 
 接口地址
 
@@ -132,8 +132,8 @@ https://stock.xueqiu.com/v5/stock/f10/cn/top_holders.json?circula=1&symbol=SH600
 
 ```
 symbol：股票编号
-locate: 时间戳
-circula：固定资产周转率 （默认为 1）
+locate: 时间戳（不传的话默认系统最新时间戳）
+circula：固定资产周转率 1为流通股东 0为股东
 ```
 
 响应参数
@@ -146,6 +146,54 @@ items: [
 		held_ratio：持股比例
 		holder_name：持股人/机构
 	}
+]
+quit: [
+  {
+    held_num: 上期持股
+    held_ratio: 上期占比
+    holder_rank: 上期排名
+    holder_name: 股东名字
+  }
+]
+time: [
+  {
+    name: 名字
+    value: 时间戳 （上面locate参数可由此字段获取请求）
+  }
+]
+```
+
+### 雪球 （app 端）个股机构持仓
+
+接口地址
+
+```
+https://stock.xueqiu.com/v5/stock/f10/cn/org_holding/detail.json?count=50&symbol=SH601216&timestamp=1585584000000
+```
+
+请求参数
+
+```
+count: 展示数量
+timestamp: 时间戳（不传的话默认系统最新时间戳）
+symbol: 股票编号
+```
+
+响应参数
+
+```
+all_items: 全部
+fund_items: 基金
+social_items：社保
+other_items：其他
+qfii_items： QGII
+insurance_items：保险
+broker_items：券商
+time: [
+  {
+    name: 名字
+    value: 时间戳 （上面locate参数可由此字段获取请求）
+  }
 ]
 ```
 

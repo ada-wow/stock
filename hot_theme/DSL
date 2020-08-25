@@ -1,0 +1,81 @@
+PUT stock_2020-07-08
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "symbol":{
+        "type": "keyword"
+      },
+      "name":{
+        "type": "keyword"
+      },
+      "percent":{
+        "type": "double"
+      },
+      "industry_area":{
+        "type": "keyword"
+      },
+      "concept_area":{
+        "type": "keyword"
+      },
+      "location_area":{
+        "type": "keyword"
+      },
+      "body":{
+        "type": "text"
+      },
+      "current_date":{
+        "type": "date",
+        "format" : "strict_date_optional_time||epoch_second"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}
+POST /_aliases
+{
+    "actions" : [
+        { "add" : { "index" : "stock_2020-07-08", "alias" : "stock" } }
+    ]
+}
+
+
+
+
+PUT checkpoint-2020-07-08
+{
+  "mappings": {
+    "properties": {
+      "type":{
+        "type": "integer"
+      },
+      "check":{
+        "type": "integer"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}
+POST /_aliases
+{
+    "actions" : [
+        { "add" : { "index" : "checkpoint-2020-07-08", "alias" : "checkpoint" } }
+    ]
+}
+
+
+PUT stock/_settings
+{
+  "index":{
+    "blocks":{
+      "read_only":true
+    }
+  }
+}
+

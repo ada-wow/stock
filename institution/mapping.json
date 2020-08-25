@@ -1,0 +1,64 @@
+
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "symbol":{
+        "type": "keyword"
+      },
+      "name":{
+        "type": "keyword"
+      },
+      "change":{
+        "type": "long"
+      },
+      "held_num":{
+        "type": "long"
+      },
+      "held_ratio":{
+        "type": "long"
+      },
+      "price":{
+        "type": "long"
+      },
+      "market_value":{
+        "type": "float"
+      },
+      "holder_name":{
+        "type": "text",
+        "analyzer": "ik_max_word",
+        "search_analyzer": "ik_smart",
+        "fields": {
+          "keyword":{
+            "type":"keyword",
+            "ignore_above":32766
+          }
+        }
+      },
+      "circula":{
+        "type": "integer"
+      },
+      "display_date":{
+        "type": "date",
+        "format" : "strict_date_optional_time||epoch_second"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 10,
+    "number_of_replicas": 0
+  }
+}
+
+
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}
