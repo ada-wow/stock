@@ -13,11 +13,11 @@ from elasticsearch import helpers
 #自动建立stock和checkpoint的时间分片index
 #结束后force merge位一个segment，并且设置index为只读
 
-index_name = "stock_2020-07-31"
-date_str = "2020-07-31"
+index_name = "stock_2020-08-20"
+date_str = "2020-08-20"
 timeArray = time.strptime(date_str, '%Y-%m-%d')
 current_time = int(time.mktime(timeArray))
-checkpoint_name = "checkpoint-2020-07-31"
+checkpoint_name = "checkpoint-2020-08-20"
 checkpoint_separator_symbol = "$$"
 
 
