@@ -41,6 +41,7 @@ def get_top_holder(circula, symbol, locate=None, count=200):
     while not get_xueqiu_succ:
         try:
             resp = {}
+            first_time = 0
             response = requests.request("GET", url, headers=headers, params=querystring)
             # if int(response.json()['data']['times'][0]['value']) < int((time.time() - 200 * 24 * 60 * 60) * 1000):
             #     print ("out  date stock")
