@@ -35,9 +35,6 @@
           }
         }
       },
-      "circula":{
-        "type": "integer"
-      },
       "display_date":{
         "type": "date",
         "format" : "strict_date_optional_time||epoch_second"
@@ -62,3 +59,4 @@
     "number_of_replicas": 0
   }
 }
+, u'times': [{u'name': u'2019\u5e74\u62a5', u'value': 1577721600000L}, {u'name': u'2019\u4e09\u5b63\u62a5', u'value': 1569772800000L}, {u'name': u'2019\u4e2d\u62a5', u'value': 1561824000000L}, {u'name': u'2019\u4e00\u5b63\u62a5', u'value': 1553961600000L}, {u'name': u'2018\u5e74\u62a5', u'value': 1546185600000L}, {u'name': u'2018\u4e09\u5b63\u62a5', u'value': 1538236800000L}, {u'name': u'2018\u4e2d\u62a5', u'value': 1530288000000L}, {u'name': u'2018\u4e00\u5b63\u62a5', u'value': 1522425600000L}, {u'name': u'2017\u5e74\u62a5', u'value': 1514649600000L}, {u'name': u'2017\u4e09\u5b63\u62a5', u'value': 1506700800000L}, {u'name': u'2017\u4e2d\u62a5', u'value': 1498752000000L}, {u'name': u'2017\u4e00\u5b63\u62a5', u'value': 1490889600000L}, {u'name': u'2016\u5e74\u62a5', u'value': 1483113600000L}, {u'name': u'2016\u4e09\u5b63\u62a5', u'value': 1475164800000L}, {u'name': u'2016\u4e2d\u62a5', u'value': 1467216000000L}, {u'name': u'2016\u4e00\u5b63\u62a5', u'value': 1459353600000L}, {u'name': u'2015\u5e74\u62a5', u'value': 1451491200000L}, {u'name': u'2015\u4e09\u5b63\u62a5', u'value': 1443542400000L}, {u'name': u'2015\u4e2d\u62a5', u'value': 1435593600000L}, {u'name': u'2015\u4e00\u5b63\u62a5', u'value': 1427731200000L}]}, u'error_description': u''}
