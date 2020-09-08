@@ -1,2 +1,3 @@
 .idea/*
 *.ovpn
+node_modules/
