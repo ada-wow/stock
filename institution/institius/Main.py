@@ -32,11 +32,19 @@ if __name__ == '__main__':
     brokers = []
     glalics = []
     foreign_invests = []
-    exchanges = []
+    govers = []
+    exists = []
     current_brokers = os.getcwd() + '\\broker'
     current_glalics = os.getcwd() + '\\garlic'
     current_foreign_invest = os.getcwd() + '\\foreign_invest'
-    current_exchange = os.getcwd() + '\\exchange'
+    current_gover = os.getcwd() + '\\goverment'
+    current_exists = os.getcwd() + "\\exists"
+    with open(current_exists, 'r') as f:
+        exist = True
+        while exist:
+            exist = f.readline()
+            if exist:
+                exists.append(exist.replace('\n', ''))
     with open(current_brokers, 'r') as f:
         broker = True
         while broker:
@@ -56,12 +64,12 @@ if __name__ == '__main__':
             foreign = f.readline()
             if foreign:
                 foreign_invests.append(foreign.replace('\n',''))
-    with open(current_exchange, 'r') as f:
-        exchange = True
-        while exchange:
-            exchange = f.readline()
-            if exchange:
-                exchanges.append(exchange.replace('\n',''))
+    with open(current_gover, 'r') as f:
+        gover = True
+        while gover:
+            gover = f.readline()
+            if gover:
+                govers.append(gover.replace('\n',''))
 
     for broker in brokers:
         print(broker)
@@ -74,7 +82,7 @@ if __name__ == '__main__':
             "match_all": {}
         }
     }
-    index_name = "institution_2020_08_25"
+    index_name = "institution_2020_08_27"
     es = Elasticsearch(hosts="http://localhost:9200")
     for item in scroll_by_query(es, index_name, body):
         if basic_data.has_key(item['symbol']):
@@ -83,29 +91,45 @@ if __name__ == '__main__':
             basic_data[item['symbol']] = [item['holder_name']]
 
     result = {}
+    hit_result = {}
     for symbol in basic_data.keys():
         holders = basic_data[symbol]
         match_count = 0
+        hit_count = 0
         match_broker = False
         match_glalic = False
         match_foreign = False
         match_social = False
         match_private = False
-        match_exchange = False
+        match_gover = False
+        if symbol == "sh688007":
+            import pdb;pdb.set_trace()
         for holder in holders:
-            if (not match_broker) and str(holder) in brokers:
-                match_broker = True
-            if (not match_glalic) and str(holder) in glalics:
-                match_glalic = True
-            if (not match_glalic) and str(holder) in foreign_invests:
-                match_foreign = True
 
-            if (not match_social) and "社保" in holder:
+            if "基金" not in holder and (holder.endswith("证券股份有限公司") or holder.endswith("证券有限责任公司") or holder.endswith("证券有限公司")):
+                match_broker = True
+                hit_count = hit_count + 1
+            if str(holder) in glalics:
+                match_glalic = True
+                hit_count = hit_count + 1
+            if "交易所" in holder or (holder.endswith("自有资金") and "公司" not in holder):
+                match_foreign = True
+                hit_count = hit_count + 1
+            else:
+                for foreign in foreign_invests:
+                    if foreign in str(holder):
+                        match_foreign = True
+                        hit_count = hit_count + 1
+                        break
+            if ("社保" in holder or holder.startswith("基本养老")):
                 match_social = True
-            if (not match_private) and "私募" in holder:
+                hit_count = hit_count + 1
+            if "私募" in holder:
                 match_private = True
-            if (not match_exchange) and str(holder) in exchanges:
-                match_exchange = True
+                hit_count = hit_count + 1
+            if str(holder) in govers:
+                match_gover = True
+                hit_count = hit_count + 1
         if match_broker:# 券商
             match_count = match_count + 1
         if match_glalic:# 牛散
@@ -116,9 +140,15 @@ if __name__ == '__main__':
             match_count = match_count + 1
         if match_private: # 私募
             match_count = match_count + 1
-        if match_exchange: #交易所
+        if match_gover: # 政府机构
             match_count = match_count + 1
         result[symbol] = match_count
+        hit_result[symbol] = hit_count
+
+
+
+
+
     match_five = []
     match_four = []
     match_three = []
@@ -130,20 +160,34 @@ if __name__ == '__main__':
             match_four.append((key, result[key]))
         if result[key] == 3:
             match_three.append((key, result[key]))
-        if result[key] == 2:
-            match_two.append((key, result[key]))
-    for item in match_five:
-        print(item)
-    for item in match_four:
-        print(item)
-    for item in match_three:
-        print(item)
-    for item in match_two:
-        print(item)
-
-
-
-
-
-
+        # if result[key] == 2:
+        #     match_two.append((key, result[key]))
+    for key,value in match_five:
+        if key not in exists:
+            print(key, value)
+    for ey,value in match_four:
+        if key not in exists:
+            print(key, value)
+    for ey,value in match_three:
+        if key not in exists:
+            print(key, value)
+    # for item in match_two:
+    #     print(item)
     print("hello")
+
+
+    order_result = sorted(hit_result.items(),key = lambda x:x[1],reverse = True)
+    for key, value in order_result:
+        if value > 3 and result[key] > 2:
+            if key not in exists:
+                print(key, value)
+
+    print('word')
+
+    order_result = sorted(hit_result.items(), key=lambda x: x[1], reverse=True)
+    for key, value in order_result:
+        if value > 4:
+            if key not in exists:
+                print(key, value)
+
+

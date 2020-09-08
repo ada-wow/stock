@@ -1,4 +1,5 @@
 
+
 # coding=utf-8
 import sys
 reload(sys)
@@ -71,19 +72,26 @@ def get_top_holder(circula, symbol, locate=None, count=200):
     return resp
 
 
-def save_top_holder(resp, index_name, es):
+
+
+def save_top_holder():
     circula = 1
     all_circula = 0
     latest_min_time = int((time.time() - 200*24*60*60)*1000)
     latest_time = latest_min_time
     process_count = 0
-    for item in resp[u'hits'][u'hits']:
+    for i in range(1):
+        item =  {
+                "symbol": "sh688981",
+                "name": u"xx",
+                "percent": -7.067,
+                "body": {"sell": "77.060", "volume": 219471588, "code": "688981", "name": "\u4e2d\u82af\u56fd\u9645", "nmc": 8016021.804438, "turnoverratio": 21.09835, "ticktime": "15:29:59", "symbol": "sh688981", "pricechange": "-5.860", "changepercent": "-7.067", "trade": "77.060", "high": "84.900", "amount": 17388147968, "buy": "77.050", "low": "75.000", "settlement": "82.920", "open": "79.000", "pb": 8.874, "mktcap": 57143652.993158, "per": 0},
+            }
         process_count = process_count + 1
         print("process count: ", process_count)
-        item = item['_source']
         symbol = item[u'symbol']
         try:
-            price = float(json.loads(item[u'body']).get("trade", ""))
+            price = float(item[u'body'].get("trade", ""))
             if not price:
                 print("no price")
                 print(item[u'name'].encode('utf-8'))
@@ -92,16 +100,16 @@ def save_top_holder(resp, index_name, es):
             print("no price in exception")
             print(item[u'name'].encode('utf-8'))
             continue
-        exist = False
-        try:
-            stock_doc = es.get("tmp_holder_record", id=symbol)
-            exist = True
-        except Exception as ex:
-            pass
-        if exist:
-            print(item[u'name'].encode('utf-8'))
-            print("exits in temp holder recoerd")
-            continue
+        # exist = False
+        # try:
+        #     stock_doc = es.get("tmp_holder_record", id=symbol)
+        #     exist = True
+        # except Exception as ex:
+        #     pass
+        # if exist:
+        #     print(item[u'name'].encode('utf-8'))
+        #     print("exits in temp holder recoerd")
+        #     continue
         for i in range(3):
             top_holder_json = get_top_holder(circula, symbol)
             if len(top_holder_json['data']['times']) == 0:
@@ -167,7 +175,7 @@ def save_top_holder(resp, index_name, es):
                 time.sleep(0.2)
             for stud in top_holder_json['data']['items']:
                 single_holder = {
-                    "_index": index_name,
+                    "_index": "index_name",
                     "_id": symbol + "_" + str(hash(stud['holder_name'])),
                     "_source": {
                         "symbol": symbol,
@@ -193,27 +201,9 @@ def save_top_holder(resp, index_name, es):
                 all_circula_holder[circula_holder_key] = circula_holder[circula_holder_key]
         actions = all_circula_holder.values()
         if len(actions) > 0:
-            bulk_succ = False
-            while not bulk_succ:
-                try:
-                    helpers.bulk(es, actions)
-                    bulk_succ = True
-                except Exception:
-                    time.sleep(0.5)
-        es.index(index='tmp_holder_record', body={}, id=symbol)
+            for item in actions:
+                print(item)
         print(item[u'name'].encode('utf-8'))
 
-if __name__ == '__main__':
-    index_name = "institution_2020_09_03"
-    es = Elasticsearch(hosts="http://localhost:9200")
-    body = {
-        "size": 10000,
-        "query": {
-            "match_all": {}
-        }
-    }
-    resp = es.search(index="stock_2020-08-28", body=body)
 
-    save_top_holder(resp, index_name, es)
-
-
+save_top_holder()
